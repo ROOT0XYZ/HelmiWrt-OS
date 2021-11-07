@@ -11,19 +11,35 @@ HWOSDIR="package/base-files/files"
 # Modify default IP
 #sed -i 's/192.168.1.1/192.168.50.5/g' $HWOSDIR/bin/config_generate
 
+# Add luci-app-ssr-plus
+pushd package/lean
+git clone --depth=1 https://github.com/fw876/helloworld
+popd
+
 # Clone community packages to package/community
 mkdir package/community
 pushd package/community
 
-# Add Lienol's Packages
-git clone --depth=1 https://github.com/Lienol/openwrt-package
-rm -rf ../lean/luci-app-kodexplorer
+# Add luci-app-passwall
+git clone --depth=1 https://github.com/xiaorouji/openwrt-passwall
+sed -i 's/ upx\/host//g' openwrt-passwall/v2ray-plugin/Makefile
+grep -lr upx/host openwrt-passwall/* | xargs -t -I {} sed -i '/upx\/host/d' {}
 
 # Add luci-proto-minieap
 git clone --depth=1 https://github.com/ysc3839/luci-proto-minieap
 
 # Add OpenClash
 git clone --depth=1 -b master https://github.com/vernesong/OpenClash
+
+# Add luci-app-diskman
+git clone --depth=1 https://github.com/SuLingGG/luci-app-diskman
+mkdir parted
+cp luci-app-diskman/Parted.Makefile parted/Makefile
+
+# Add luci-app-dockerman
+rm -rf ../lean/luci-app-docker
+git clone --depth=1 https://github.com/lisaac/luci-app-dockerman
+git clone --depth=1 https://github.com/lisaac/luci-lib-docker
 
 # Add luci-app-wrtbwmon
 svn co https://github.com/sirpdboy/sirpdboy-package/trunk/luci-app-wrtbwmon
@@ -102,12 +118,6 @@ sed -i "s/uci set system.@system[0].timezone=CST-8/uci set system.@system[0].hos
 sed -i "s/Shanghai/Jakarta/g" zzz-default-settings
 popd
 
-# Use Lienol's https-dns-proxy package
-pushd feeds/packages/net
-rm -rf https-dns-proxy
-svn co https://github.com/Lienol/openwrt-packages/trunk/net/https-dns-proxy
-popd
-
 # Fix mt76 wireless driver
 pushd package/kernel/mt76
 sed -i '/mt7662u_rom_patch.bin/a\\techo mt76-usb disable_usb_sg=1 > $\(1\)\/etc\/modules.d\/mt76-usb' Makefile
@@ -130,6 +140,10 @@ wget -O $HWOSDIR/bin/vmess "https://raw.githubusercontent.com/ryanfauzi1/vmesscr
 # Add ram checker from wegare123
 # run "ram" using terminal to check ram usage
 wget -O $HWOSDIR/bin/ram "https://raw.githubusercontent.com/wegare123/ram/main/ram.sh" && chmod +x $HWOSDIR/bin/ram
+
+# Add fix download file.php for xderm and libernet
+# run "fixphp" using terminal for use
+wget -O $HWOSDIR/bin/fixphp "https://raw.githubusercontent.com/helmiau/openwrt-config/main/fix-xderm-libernet-gui" && chmod +x $HWOSDIR/bin/fixphp
 
 #-----------------------------------------------------------------------------
 #   End of @helmiau terminal scripts additionals menu
